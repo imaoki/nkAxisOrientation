@@ -1,0 +1,212 @@
+// © 2023 imaoki | MIT License | https://github.com/imaoki
+{
+  string $version = "1.0.0";
+  proc string getCustomObject() {
+    return `textField -q -tx nkAxisOrientationWindow|formOuter|txfCustomObject`;
+  }
+  proc setAxisOrientation(int $mode) {
+    string $currentCtx = `currentCtx`;
+    string $customObject = getCustomObject();
+    // print ("$mode:" + $mode + "\n");
+    // print ("$currentCtx:" + $currentCtx + "\n");
+    // print ("$customObject:" + $customObject + "\n");
+    switch ($currentCtx) {
+      case "moveSuperContext":
+        switch ($mode) {
+          case 1:
+            manipMoveContext -e -m 0 "Move";
+            break;
+          case 2:
+            manipMoveContext -e -m 2 "Move";
+            break;
+          case 3:
+            manipMoveContext -e -m 10 "Move";
+            break;
+          case 4:
+            manipMoveContext -e -m 1 "Move";
+            break;
+          case 5:
+            if (`objExists $customObject`) {
+              manipMoveContext -e -m 6 -oo $customObject "Move";
+            }
+            break;
+          default:
+            break;
+        }
+        break;
+      case "RotateSuperContext":
+        switch ($mode) {
+          case 1:
+            manipRotateContext -e -m 0 "Rotate";
+            break;
+          case 2:
+            manipRotateContext -e -m 1 "Rotate";
+            break;
+          case 3:
+            manipRotateContext -e -m 10 "Rotate";
+            break;
+          case 4:
+            break;
+          case 5:
+            if (`objExists $customObject`) {
+              manipRotateContext -e -m 3 -oo $customObject "Rotate";
+            }
+            break;
+          default:
+            break;
+        }
+        break;
+      case "scaleSuperContext":
+        switch ($mode) {
+          case 1:
+            manipScaleContext -e -m 0 "Scale";
+            break;
+          case 2:
+            manipScaleContext -e -m 2 "Scale";
+            break;
+          case 3:
+            manipScaleContext -e -m 10 "Scale";
+            break;
+          case 4:
+            manipScaleContext -e -m 1 "Scale";
+            break;
+          case 5:
+            if (`objExists $customObject`) {
+              manipScaleContext -e -m 6 -oo $customObject "Scale";
+            }
+            break;
+          default:
+            break;
+        }
+        break;
+      default:
+        break;
+    }
+    // setFocus nkAxisOrientationWindow;
+    setFocus MayaWindow;
+  }
+  proc createWindow() {
+    if (`window -ex  nkAxisOrientationWindow` == true) deleteUI nkAxisOrientationWindow;
+    window -t ("AxisOrientation " + $version)
+        -mxb false -mnb false -s true
+        -wh 160 160
+        nkAxisOrientationWindow;
+    formLayout formOuter;
+    formLayout formInner;
+    button -l "Object" btnObject;
+    button -l "World" btnWorld;
+    button -l "Component" btnComponent;
+    button -l "Parent" btnParent;
+    button -en false -l "Custom" btnCustom;
+    setParent ..;
+    string $customAnn = "Custom Object: Enter object name or select object and press Get button";
+    textField -ann $customAnn -tx "" txfCustomObject;
+    button -ann $customAnn -l "Get" btnGetCustom;
+    setParent ..;
+    formLayout -e
+        -af btnObject "top" 0
+        -af btnObject "left" 0
+        -af btnObject "right" 0
+        -ap btnObject "bottom" 0 20
+        -ac btnWorld "top" 0 btnObject
+        -af btnWorld "left" 0
+        -af btnWorld "right" 0
+        -ap btnWorld "bottom" 0 40
+        -ac btnComponent "top" 0 btnWorld
+        -af btnComponent "left" 0
+        -af btnComponent "right" 0
+        -ap btnComponent "bottom" 0 60
+        -ac btnParent "top" 0 btnComponent
+        -af btnParent "left" 0
+        -af btnParent "right" 0
+        -ap btnParent "bottom" 0 80
+        -ac btnCustom "top" 0 btnParent
+        -af btnCustom "left" 0
+        -af btnCustom "right" 0
+        -af btnCustom "bottom" 0
+        formInner;
+    formLayout -e
+        -af formInner "top" 5
+        -af formInner "left" 5
+        -af formInner "right" 5
+        -af formInner "bottom" 28
+        -ac btnGetCustom "top" 0 formInner
+        -aof btnGetCustom "left" -50
+        -af btnGetCustom "right" 5
+        -af btnGetCustom "bottom" 5
+        -ac txfCustomObject "top" 0 formInner
+        -af txfCustomObject "left" 5
+        -ac txfCustomObject "right" 0 btnGetCustom
+        -af txfCustomObject "bottom" 5
+        formOuter;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnObject\");" btnObject;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnWorld\");" btnWorld;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnComponent\");" btnComponent;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnParent\");" btnParent;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnCustom\");" btnCustom;
+    textField -e -tcc "nkAxisOrientationController(\"tcc\", \"txfCustomObject\");" txfCustomObject;
+    button -e -c "nkAxisOrientationController(\"c\", \"btnGetCustom\");" btnGetCustom;
+    setFocus nkAxisOrientationWindow;
+    showWindow nkAxisOrientationWindow;
+  }
+  proc registerScriptJob() {
+    nkAxisOrientationToolChanged();
+    int $jobNumber = `scriptJob
+        -e "ToolChanged" "nkAxisOrientationToolChanged"
+        -p nkAxisOrientationWindow`;
+    print("nkAxisOrientation-ToolChanged:" + $jobNumber + "\n");
+  }
+  proc nkAxisOrientationInitialize() {
+    createWindow();
+    registerScriptJob();
+  }
+  global proc nkAxisOrientationToolChanged() {
+    button -e -en (`currentCtx` != "RotateSuperContext")
+        nkAxisOrientationWindow|formOuter|formInner|btnParent;
+  }
+  global proc nkAxisOrientationController(string $event, string $control) {
+    switch ($event) {
+      case "c":
+        switch ($control) {
+          case "btnObject":
+            setAxisOrientation(1);
+            break;
+          case "btnWorld":
+            setAxisOrientation(2);
+            break;
+          case "btnComponent":
+            setAxisOrientation(3);
+            break;
+          case "btnParent":
+            setAxisOrientation(4);
+            break;
+          case "btnCustom":
+            setAxisOrientation(5);
+            break;
+          case "btnGetCustom":
+            textField -e -tx (`ls -sl`)
+                nkAxisOrientationWindow|formOuter|txfCustomObject;
+            break;
+          default:
+            break;
+        }
+        break;
+      case "tcc":
+        switch ($control) {
+          case "txfCustomObject":
+            button -e -en `objExists (getCustomObject())`
+                nkAxisOrientationWindow|formOuter|formInner|btnCustom;
+            break;
+          default:
+            break;
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  global proc nkAxisOrientation() {
+    nkAxisOrientationInitialize();
+  }
+  nkAxisOrientation();
+}
