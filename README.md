@@ -3,11 +3,15 @@
 <!-- [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/releases/latest) -->
 [![GitHub](https://img.shields.io/github/license/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/blob/main/LICENSE)
 
-Move/Rotate/ScaleツールのAxis Orientationを設定する。
+移動/回転/スケールツールのAxis Orientationを設定する。
 
-<!-- ## 特徴 -->
+## 特徴
 
-<!-- * 特徴 -->
+* 移動/回転/スケールツール設定のAxis Orientationと同期。
+  ![gui](resource/gui.png "gui")
+
+* カスタム軸用のトランスフォームオブジェクトを保持し、任意のタイミングでカスタム軸を更新可能。
+  ![how_to_use_custom_object](resource/how_to_use_custom_object.gif "how_to_use_custom_object")
 
 ## ライセンス
 
@@ -39,7 +43,7 @@ Move/Rotate/ScaleツールのAxis Orientationを設定する。
 ## 使い方
 
 ```mel
-nkAxisOrientation;
+nkAxisOrientation();
 ```
 
 <!-- ## 制限 -->
