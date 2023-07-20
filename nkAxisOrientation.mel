@@ -1,6 +1,6 @@
 // © 2023 imaoki | MIT License | https://github.com/imaoki
 {
-  string $version = "1.1.1";
+  string $version = "1.2.0";
 
   proc string getCurrentContext() {
     string $currentCtx = `currentCtx`;
@@ -10,6 +10,31 @@
       case "scaleSuperContext": return "Scale";
     }
     return "";
+  }
+
+  proc string getCustomObject() {
+    return `textField -q -tx "nkAxisOrientationWindow|container|customObject|customObjectField"`;
+  }
+  proc setCustomObject() {
+    string $selection[] = `ls -sl -tr`;
+    if (`size $selection` == 1 && `objExists $selection[0]`) {
+      textField -e -tx $selection[0] "nkAxisOrientationWindow|container|customObject|customObjectField";
+    }
+  }
+  proc updateCustomOrientAxes() {
+    string $customObject = getCustomObject();
+    if (`objExists $customObject`) {
+      switch (getCurrentContext()) {
+        case "Move": manipMoveContext -e -m 6 -oo $customObject "Move"; break;
+        case "Rotate": manipRotateContext -e -m 3 -oo $customObject "Rotate"; break;
+        case "Scale": manipScaleContext -e -m 6 -oo $customObject "Scale"; break;
+        default: break;
+      }
+    }
+  }
+  proc setToSelection() {
+    setCustomObject();
+    updateCustomOrientAxes();
   }
 
   proc setMoveOrientAxes(int $axis, float $value) {
@@ -43,6 +68,8 @@
 
   proc buildMoveOrientMenu(string $menu) {
     menu -e -dai $menu;
+    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+    // menuItem -d true;
     menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToObject")) -p $menu -c "manipMoveOrient(5);" miObject;
     menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToComponent")) -p $menu -c "manipMoveOrient(4);" miComponent;
     menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToVertex")) -p $menu -c "manipMoveOrient(1);" miVertex;
@@ -52,6 +79,8 @@
   }
   proc buildRotateOrientMenu(string $menu) {
     menu -e -dai $menu;
+    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+    // menuItem -d true;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipRotateOrient(5);" miObject;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipRotateOrient(4);" miComponent;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipRotateOrient(1);" miVertex;
@@ -61,6 +90,8 @@
   }
   proc buildScaleOrientMenu(string $menu) {
     menu -e -dai $menu;
+    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+    // menuItem -d true;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipScaleOrient(5);" miObject;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipScaleOrient(4);" miComponent;
     menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipScaleOrient(1);" miVertex;
@@ -180,7 +211,7 @@
   }
 
   proc buildMainWindow() {
-    if (`window -ex  nkAxisOrientationWindow` == true) {
+    if (`window -ex nkAxisOrientationWindow` == true) {
       deleteUI nkAxisOrientationWindow;
     }
     window -t ("AxisOrientation " + $version)
@@ -190,9 +221,15 @@
         nkAxisOrientationWindow;
 
     string $menuIcon = "popupMenuIcon.png";
+    string $refreshIcon = "refresh.png";
+
     string $container = `columnLayout container`;
       string $axis = `rowLayout -nc 2 -cw2 20 190 axis`;
-        string $axisButton = `iconTextButton -i $menuIcon -w 17 -h 26 axisButton`;
+        string $axisButton = `iconTextButton
+            // -bgc 0.5 0.0 0.0
+            -i $menuIcon
+            -w 20 -h 26
+            axisButton`;
           string $axisMenu = `popupMenu
               -b 1
               -p $axisButton
@@ -208,7 +245,11 @@
 
       string $orientFieldAnn = `uiRes("m_manipMoveProperties.kCustomAxisOrientFieldsAnn")`;
       string $orient = `rowLayout -nc 4 -cw4 20 62 62 62 orient`;
-        string $orientButton = `iconTextButton -i $menuIcon -w 17 -h 26 orientButton`;
+        string $orientButton = `iconTextButton
+            // -bgc 0.0 0.5 0.0
+            -i $menuIcon
+            -w 20 -h 26
+            orientButton`;
           string $orientMenu = `popupMenu
               -b 1
               -p $orientButton
@@ -225,14 +266,37 @@
             orientFieldZ`;
         setParent ..;
 
+      string $customObject = `rowLayout -nc 2 -cw2 20 190 customObject`;
+        string $updateOrientButton = `iconTextButton
+            // -bgc 0.0 0.0 0.5
+            -i $refreshIcon
+            -w 20 -h 20
+            -ann "Update the custom axis orientation"
+            -c "nkAxisOrientationInvokeEvent(\"c\", \"updateOrientButton\");"
+            updateOrientButton`;
+        string $customObjectField = `textField
+            -width 190
+            -height 26
+            -ann "Enter a custom object"
+            -aie true
+            -ec "nkAxisOrientationInvokeEvent(\"ec\", \"customObjectField\");"
+            customObjectField`;
+        setParent ..;
+
+    // print (`format -s $container "// ^1s\n"`);
+    // print (`format -s $axis "// ^1s\n"`);
     // print (`format -s $axisButton "// ^1s\n"`);
     // print (`format -s $axisMenu "// ^1s\n"`);
     // print (`format -s $axisField "// ^1s\n"`);
+    // print (`format -s $orient "// ^1s\n"`);
     // print (`format -s $orientButton "// ^1s\n"`);
     // print (`format -s $orientMenu "// ^1s\n"`);
     // print (`format -s $orientFieldX "// ^1s\n"`);
     // print (`format -s $orientFieldY "// ^1s\n"`);
     // print (`format -s $orientFieldZ "// ^1s\n"`);
+    // print (`format -s $customObject "// ^1s\n"`);
+    // print (`format -s $updateOrientButton "// ^1s\n"`);
+    // print (`format -s $customObjectField "// ^1s\n"`);
 
     setFocus nkAxisOrientationWindow;
     showWindow nkAxisOrientationWindow;
@@ -263,6 +327,13 @@
   }
   global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
     switch ($event) {
+      case "c":
+        switch ($control) {
+          case "miSelection": setToSelection(); break;
+          case "updateOrientButton": updateCustomOrientAxes(); break;
+          default: break;
+        }
+        break;
       case "cc":
         switch ($control) {
           case "orientFieldX":
@@ -274,6 +345,12 @@
           case "orientFieldZ":
             orientAxesChanged(2, "nkAxisOrientationWindow|container|orient|orientFieldZ");
             break;
+          default: break;
+        }
+        break;
+      case "ec":
+        switch ($control) {
+          case "customObjectField": updateCustomOrientAxes(); break;
           default: break;
         }
         break;
@@ -294,5 +371,4 @@
   global proc nkAxisOrientation() {
     nkAxisOrientationInitialize();
   }
-  nkAxisOrientation();
 }
