@@ -8,9 +8,11 @@
 ## 特徴
 
 * 移動/回転/スケールツール設定のAxis Orientationと同期。
+
   ![gui](resource/gui.png "gui")
 
 * カスタム軸用のトランスフォームオブジェクトを保持し、任意のタイミングでカスタム軸を更新可能。
+
   ![how_to_use_custom_object](resource/how_to_use_custom_object.gif "how_to_use_custom_object")
 
 ## ライセンス
