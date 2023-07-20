@@ -1,374 +1,372 @@
 // © 2023 imaoki | MIT License | https://github.com/imaoki
-{
-  string $version = "1.2.0";
+proc string getCurrentContext() {
+  string $currentCtx = `currentCtx`;
+  switch ($currentCtx) {
+    case "moveSuperContext": return "Move";
+    case "RotateSuperContext": return "Rotate";
+    case "scaleSuperContext": return "Scale";
+  }
+  return "";
+}
 
-  proc string getCurrentContext() {
-    string $currentCtx = `currentCtx`;
-    switch ($currentCtx) {
-      case "moveSuperContext": return "Move";
-      case "RotateSuperContext": return "Rotate";
-      case "scaleSuperContext": return "Scale";
-    }
-    return "";
+proc string getCustomObject() {
+  return `textField -q -tx "nkAxisOrientationWindow|container|customObject|customObjectField"`;
+}
+proc setCustomObject() {
+  string $selection[] = `ls -sl -tr`;
+  if (`size $selection` == 1 && `objExists $selection[0]`) {
+    textField -e -tx $selection[0] "nkAxisOrientationWindow|container|customObject|customObjectField";
   }
+}
+proc updateCustomOrientAxes() {
+  string $customObject = getCustomObject();
+  if (`objExists $customObject`) {
+    switch (getCurrentContext()) {
+      case "Move": manipMoveContext -e -m 6 -oo $customObject "Move"; break;
+      case "Rotate": manipRotateContext -e -m 3 -oo $customObject "Rotate"; break;
+      case "Scale": manipScaleContext -e -m 6 -oo $customObject "Scale"; break;
+      default: break;
+    }
+  }
+}
+proc setToSelection() {
+  setCustomObject();
+  updateCustomOrientAxes();
+}
 
-  proc string getCustomObject() {
-    return `textField -q -tx "nkAxisOrientationWindow|container|customObject|customObjectField"`;
+proc setMoveOrientAxes(int $axis, float $value) {
+  string $moveContext = "Move";
+  float $oa[] = `manipMoveContext -q -oa $moveContext`;
+  $oa[$axis] = deg_to_rad($value);
+  manipMoveContext -e -m 6 -oa $oa[0] $oa[1] $oa[2] $moveContext;
+}
+proc setRotateOrientAxes(int $axis, float $value) {
+  string $rotateContext = "Rotate";
+  float $oa[] = `manipRotateContext -q -oa $rotateContext`;
+  $oa[$axis] = deg_to_rad($value);
+  manipRotateContext -e -m 3 -oa $oa[0] $oa[1] $oa[2] $rotateContext;
+}
+proc setScaleOrientAxes(int $axis, float $value) {
+  string $scaleContext = "Scale";
+  float $oa[] = `manipScaleContext -q -oa $scaleContext`;
+  $oa[$axis] = deg_to_rad($value);
+  manipScaleContext -e -m 6 -oa $oa[0] $oa[1] $oa[2] $scaleContext;
+}
+proc orientAxesChanged(int $axis, string $field) {
+  float $value = `floatField -q -v $field`;
+  string $currentContext = getCurrentContext();
+  switch (getCurrentContext()) {
+    case "Move": setMoveOrientAxes($axis, $value); break;
+    case "Rotate": setRotateOrientAxes($axis, $value); break;
+    case "Scale": setScaleOrientAxes($axis, $value); break;
+    default: break;
   }
-  proc setCustomObject() {
-    string $selection[] = `ls -sl -tr`;
-    if (`size $selection` == 1 && `objExists $selection[0]`) {
-      textField -e -tx $selection[0] "nkAxisOrientationWindow|container|customObject|customObjectField";
-    }
+}
+
+proc buildMoveOrientMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+  // menuItem -d true;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToObject")) -p $menu -c "manipMoveOrient(5);" miObject;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToComponent")) -p $menu -c "manipMoveOrient(4);" miComponent;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToVertex")) -p $menu -c "manipMoveOrient(1);" miVertex;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToEdge")) -p $menu -c "manipMoveOrient(2);" miEdge;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToFace")) -p $menu -c "manipMoveOrient(3);" miFace;
+  menuItem -l (uiRes("m_manipMoveProperties.kMoveResetOri")) -p $menu -c "manipMoveOrient(0);" miReset;
+}
+proc buildRotateOrientMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+  // menuItem -d true;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipRotateOrient(5);" miObject;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipRotateOrient(4);" miComponent;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipRotateOrient(1);" miVertex;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToEdge")` -p $menu -c "manipRotateOrient(2);" miEdge;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToFace")` -p $menu -c "manipRotateOrient(3);" miFace;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveResetOri")` -p $menu -c "manipRotateOrient(0);" miReset;
+}
+proc buildScaleOrientMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
+  // menuItem -d true;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipScaleOrient(5);" miObject;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipScaleOrient(4);" miComponent;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipScaleOrient(1);" miVertex;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToEdge")` -p $menu -c "manipScaleOrient(2);" miEdge;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToFace")` -p $menu -c "manipScaleOrient(3);" miFace;
+  menuItem -l `uiRes("m_manipMoveProperties.kMoveResetOri")` -p $menu -c "manipScaleOrient(0);" miReset;
+}
+proc buildOrientMenu(string $menu) {
+  switch (getCurrentContext()) {
+    case "Move": buildMoveOrientMenu($menu); break;
+    case "Rotate": buildRotateOrientMenu($menu); break;
+    case "Scale": buildScaleOrientMenu($menu); break;
+    default: break;
   }
-  proc updateCustomOrientAxes() {
-    string $customObject = getCustomObject();
-    if (`objExists $customObject`) {
-      switch (getCurrentContext()) {
-        case "Move": manipMoveContext -e -m 6 -oo $customObject "Move"; break;
-        case "Rotate": manipRotateContext -e -m 3 -oo $customObject "Rotate"; break;
-        case "Scale": manipScaleContext -e -m 6 -oo $customObject "Scale"; break;
+}
+
+proc buildMoveAxisMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l (uiRes("m_manipMoveProperties.kObject")) -p $menu -c "manipMoveContext -e -m 0 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kWorld")) -p $menu -c "manipMoveContext -e -m 2 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kAutoAlign")) -p $menu -c "manipMoveContext -e -m 10 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kLocal")) -p $menu -c "manipMoveContext -e -m 1 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kNormal")) -p $menu -c "manipMoveContext -e -m 3 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kAlongRotationAxis")) -p $menu -c "manipMoveContext -e -m 4 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")) -p $menu -c "manipMoveContext -e -m 5 \"Move\"";
+  menuItem -l (uiRes("m_manipMoveProperties.kCustomAxisOrientation")) -p $menu -c "manipMoveContext -e -m 6 \"Move\"";
+}
+proc buildRotateAxisMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l `uiRes("m_manipMoveProperties.kObject")` -p $menu -c "manipRotateContext -e -m 0 \"Rotate\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kWorld")` -p $menu -c "manipRotateContext -e -m 1 \"Rotate\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kAutoAlign")` -p $menu -c "manipRotateContext -e -m 10 \"Rotate\"";
+  menuItem -l (uiRes("m_manipRotateProperties.kGimbal")) -p $menu -c "manipRotateContext -e -m 2 \"Rotate\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kCustomAxisOrientation")` -p $menu -c "manipRotateContext -e -m 3 \"Rotate\"";
+}
+proc buildScaleAxisMenu(string $menu) {
+  menu -e -dai $menu;
+  menuItem -l `uiRes("m_manipMoveProperties.kObject")` -p $menu -c "manipScaleContext -e -m 0 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kWorld")` -p $menu -c "manipScaleContext -e -m 2 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kAutoAlign")` -p $menu -c "manipScaleContext -e -m 10 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kLocal")` -p $menu -c "manipScaleContext -e -m 1 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kNormal")` -p $menu -c "manipScaleContext -e -m 3 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kAlongRotationAxis")` -p $menu -c "manipScaleContext -e -m 4 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")` -p $menu -c "manipScaleContext -e -m 5 \"Scale\"";
+  menuItem -l `uiRes("m_manipMoveProperties.kCustomAxisOrientation")` -p $menu -c "manipScaleContext -e -m 6 \"Scale\"";
+}
+proc buildAxisMenu(string $menu) {
+  switch (getCurrentContext()) {
+    case "Move": buildMoveAxisMenu($menu); break;
+    case "Rotate": buildRotateAxisMenu($menu); break;
+    case "Scale": buildScaleAxisMenu($menu); break;
+    default: break;
+  }
+}
+
+proc updateControl() {
+  string $container = "nkAxisOrientationWindow|container";
+  string $axisField = "nkAxisOrientationWindow|container|axis|axisField";
+  string $orientFieldX = "nkAxisOrientationWindow|container|orient|orientFieldX";
+  string $orientFieldY = "nkAxisOrientationWindow|container|orient|orientFieldY";
+  string $orientFieldZ = "nkAxisOrientationWindow|container|orient|orientFieldZ";
+  string $axisLabel = "";
+  float $oa[] = {0.0, 0.0, 0.0};
+  switch (getCurrentContext()) {
+    case "Move":
+      string $moveContext = "Move";
+      int $moveMode = `manipMoveContext -q -m $moveContext`;
+      switch ($moveMode) {
+        case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
+        case 1: $axisLabel = `uiRes("m_manipMoveProperties.kLocal")`; break;
+        case 2: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
+        case 3: $axisLabel = `uiRes("m_manipMoveProperties.kNormal")`; break;
+        case 4: $axisLabel = `uiRes("m_manipMoveProperties.kAlongRotationAxis")`; break;
+        case 5: $axisLabel = `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")`; break;
+        case 6: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
+        case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
         default: break;
       }
-    }
+      $oa = `manipMoveContext -q -oa $moveContext`;
+      break;
+    case "Rotate":
+      string $rotateContext = "Rotate";
+      int $rotateMode = `manipRotateContext -q -m $rotateContext`;
+      switch ($rotateMode) {
+        case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
+        case 1: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
+        case 2: $axisLabel = `uiRes("m_manipRotateProperties.kGimbal")`; break;
+        case 3: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
+        case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
+        default: break;
+      }
+      $oa = `manipRotateContext -q -oa $rotateContext`;
+      break;
+    case "Scale":
+      string $scaleContext = "Scale";
+      int $scaleMode = `manipScaleContext -q -m $scaleContext`;
+      switch ($scaleMode) {
+        case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
+        case 1: $axisLabel = `uiRes("m_manipMoveProperties.kLocal")`; break;
+        case 2: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
+        case 3: $axisLabel = `uiRes("m_manipMoveProperties.kNormal")`; break;
+        case 4: $axisLabel = `uiRes("m_manipMoveProperties.kAlongRotationAxis")`; break;
+        case 5: $axisLabel = `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")`; break;
+        case 6: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
+        case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
+        default: break;
+      }
+      $oa = `manipScaleContext -q -oa $scaleContext`;
+      break;
+    default: break;
   }
-  proc setToSelection() {
-    setCustomObject();
-    updateCustomOrientAxes();
-  }
+  setParent $container;
+  textField -e -tx $axisLabel $axisField;
+  floatField -e -v (rad_to_deg($oa[0])) $orientFieldX;
+  floatField -e -v (rad_to_deg($oa[1])) $orientFieldY;
+  floatField -e -v (rad_to_deg($oa[2])) $orientFieldZ;
+}
 
-  proc setMoveOrientAxes(int $axis, float $value) {
-    string $moveContext = "Move";
-    float $oa[] = `manipMoveContext -q -oa $moveContext`;
-    $oa[$axis] = deg_to_rad($value);
-    manipMoveContext -e -m 6 -oa $oa[0] $oa[1] $oa[2] $moveContext;
-  }
-  proc setRotateOrientAxes(int $axis, float $value) {
-    string $rotateContext = "Rotate";
-    float $oa[] = `manipRotateContext -q -oa $rotateContext`;
-    $oa[$axis] = deg_to_rad($value);
-    manipRotateContext -e -m 3 -oa $oa[0] $oa[1] $oa[2] $rotateContext;
-  }
-  proc setScaleOrientAxes(int $axis, float $value) {
-    string $scaleContext = "Scale";
-    float $oa[] = `manipScaleContext -q -oa $scaleContext`;
-    $oa[$axis] = deg_to_rad($value);
-    manipScaleContext -e -m 6 -oa $oa[0] $oa[1] $oa[2] $scaleContext;
-  }
-  proc orientAxesChanged(int $axis, string $field) {
-    float $value = `floatField -q -v $field`;
-    string $currentContext = getCurrentContext();
-    switch (getCurrentContext()) {
-      case "Move": setMoveOrientAxes($axis, $value); break;
-      case "Rotate": setRotateOrientAxes($axis, $value); break;
-      case "Scale": setScaleOrientAxes($axis, $value); break;
-      default: break;
-    }
-  }
+proc buildMainWindow() {
+  string $version = "1.2.1";
 
-  proc buildMoveOrientMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
-    // menuItem -d true;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToObject")) -p $menu -c "manipMoveOrient(5);" miObject;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToComponent")) -p $menu -c "manipMoveOrient(4);" miComponent;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToVertex")) -p $menu -c "manipMoveOrient(1);" miVertex;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToEdge")) -p $menu -c "manipMoveOrient(2);" miEdge;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveSetOriToFace")) -p $menu -c "manipMoveOrient(3);" miFace;
-    menuItem -l (uiRes("m_manipMoveProperties.kMoveResetOri")) -p $menu -c "manipMoveOrient(0);" miReset;
+  if (`window -ex nkAxisOrientationWindow` == true) {
+    deleteUI nkAxisOrientationWindow;
   }
-  proc buildRotateOrientMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
-    // menuItem -d true;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipRotateOrient(5);" miObject;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipRotateOrient(4);" miComponent;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipRotateOrient(1);" miVertex;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToEdge")` -p $menu -c "manipRotateOrient(2);" miEdge;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToFace")` -p $menu -c "manipRotateOrient(3);" miFace;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveResetOri")` -p $menu -c "manipRotateOrient(0);" miReset;
-  }
-  proc buildScaleOrientMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l "Set to Selection" -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miSelection\");" miSelection;
-    // menuItem -d true;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToObject")` -p $menu -c "manipScaleOrient(5);" miObject;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToComponent")` -p $menu -c "manipScaleOrient(4);" miComponent;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToVertex")` -p $menu -c "manipScaleOrient(1);" miVertex;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToEdge")` -p $menu -c "manipScaleOrient(2);" miEdge;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveSetOriToFace")` -p $menu -c "manipScaleOrient(3);" miFace;
-    menuItem -l `uiRes("m_manipMoveProperties.kMoveResetOri")` -p $menu -c "manipScaleOrient(0);" miReset;
-  }
-  proc buildOrientMenu(string $menu) {
-    switch (getCurrentContext()) {
-      case "Move": buildMoveOrientMenu($menu); break;
-      case "Rotate": buildRotateOrientMenu($menu); break;
-      case "Scale": buildScaleOrientMenu($menu); break;
-      default: break;
-    }
-  }
+  window -t ("AxisOrientation " + $version)
+      -mxb false
+      -mnb false
+      -s false
+      nkAxisOrientationWindow;
 
-  proc buildMoveAxisMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l (uiRes("m_manipMoveProperties.kObject")) -p $menu -c "manipMoveContext -e -m 0 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kWorld")) -p $menu -c "manipMoveContext -e -m 2 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kAutoAlign")) -p $menu -c "manipMoveContext -e -m 10 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kLocal")) -p $menu -c "manipMoveContext -e -m 1 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kNormal")) -p $menu -c "manipMoveContext -e -m 3 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kAlongRotationAxis")) -p $menu -c "manipMoveContext -e -m 4 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")) -p $menu -c "manipMoveContext -e -m 5 \"Move\"";
-    menuItem -l (uiRes("m_manipMoveProperties.kCustomAxisOrientation")) -p $menu -c "manipMoveContext -e -m 6 \"Move\"";
-  }
-  proc buildRotateAxisMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l `uiRes("m_manipMoveProperties.kObject")` -p $menu -c "manipRotateContext -e -m 0 \"Rotate\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kWorld")` -p $menu -c "manipRotateContext -e -m 1 \"Rotate\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kAutoAlign")` -p $menu -c "manipRotateContext -e -m 10 \"Rotate\"";
-    menuItem -l (uiRes("m_manipRotateProperties.kGimbal")) -p $menu -c "manipRotateContext -e -m 2 \"Rotate\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kCustomAxisOrientation")` -p $menu -c "manipRotateContext -e -m 3 \"Rotate\"";
-  }
-  proc buildScaleAxisMenu(string $menu) {
-    menu -e -dai $menu;
-    menuItem -l `uiRes("m_manipMoveProperties.kObject")` -p $menu -c "manipScaleContext -e -m 0 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kWorld")` -p $menu -c "manipScaleContext -e -m 2 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kAutoAlign")` -p $menu -c "manipScaleContext -e -m 10 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kLocal")` -p $menu -c "manipScaleContext -e -m 1 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kNormal")` -p $menu -c "manipScaleContext -e -m 3 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kAlongRotationAxis")` -p $menu -c "manipScaleContext -e -m 4 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")` -p $menu -c "manipScaleContext -e -m 5 \"Scale\"";
-    menuItem -l `uiRes("m_manipMoveProperties.kCustomAxisOrientation")` -p $menu -c "manipScaleContext -e -m 6 \"Scale\"";
-  }
-  proc buildAxisMenu(string $menu) {
-    switch (getCurrentContext()) {
-      case "Move": buildMoveAxisMenu($menu); break;
-      case "Rotate": buildRotateAxisMenu($menu); break;
-      case "Scale": buildScaleAxisMenu($menu); break;
-      default: break;
-    }
-  }
+  string $menuIcon = "popupMenuIcon.png";
+  string $refreshIcon = "refresh.png";
 
-  proc updateControl() {
-    string $container = "nkAxisOrientationWindow|container";
-    string $axisField = "nkAxisOrientationWindow|container|axis|axisField";
-    string $orientFieldX = "nkAxisOrientationWindow|container|orient|orientFieldX";
-    string $orientFieldY = "nkAxisOrientationWindow|container|orient|orientFieldY";
-    string $orientFieldZ = "nkAxisOrientationWindow|container|orient|orientFieldZ";
-    string $axisLabel = "";
-    float $oa[] = {0.0, 0.0, 0.0};
-    switch (getCurrentContext()) {
-      case "Move":
-        string $moveContext = "Move";
-        int $moveMode = `manipMoveContext -q -m $moveContext`;
-        switch ($moveMode) {
-          case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
-          case 1: $axisLabel = `uiRes("m_manipMoveProperties.kLocal")`; break;
-          case 2: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
-          case 3: $axisLabel = `uiRes("m_manipMoveProperties.kNormal")`; break;
-          case 4: $axisLabel = `uiRes("m_manipMoveProperties.kAlongRotationAxis")`; break;
-          case 5: $axisLabel = `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")`; break;
-          case 6: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
-          case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
-          default: break;
-        }
-        $oa = `manipMoveContext -q -oa $moveContext`;
-        break;
-      case "Rotate":
-        string $rotateContext = "Rotate";
-        int $rotateMode = `manipRotateContext -q -m $rotateContext`;
-        switch ($rotateMode) {
-          case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
-          case 1: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
-          case 2: $axisLabel = `uiRes("m_manipRotateProperties.kGimbal")`; break;
-          case 3: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
-          case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
-          default: break;
-        }
-        $oa = `manipRotateContext -q -oa $rotateContext`;
-        break;
-      case "Scale":
-        string $scaleContext = "Scale";
-        int $scaleMode = `manipScaleContext -q -m $scaleContext`;
-        switch ($scaleMode) {
-          case 0: $axisLabel = `uiRes("m_manipMoveProperties.kObject")`; break;
-          case 1: $axisLabel = `uiRes("m_manipMoveProperties.kLocal")`; break;
-          case 2: $axisLabel = `uiRes("m_manipMoveProperties.kWorld")`; break;
-          case 3: $axisLabel = `uiRes("m_manipMoveProperties.kNormal")`; break;
-          case 4: $axisLabel = `uiRes("m_manipMoveProperties.kAlongRotationAxis")`; break;
-          case 5: $axisLabel = `uiRes("m_manipMoveProperties.kAlongLiveObjectAxis")`; break;
-          case 6: $axisLabel = `uiRes("m_manipMoveProperties.kCustomAxisOrientation")`; break;
-          case 9: case 10: $axisLabel = `uiRes("m_manipMoveProperties.kAutoAlign")`; break;
-          default: break;
-        }
-        $oa = `manipScaleContext -q -oa $scaleContext`;
-        break;
-      default: break;
-    }
-    setParent $container;
-    textField -e -tx $axisLabel $axisField;
-    floatField -e -v (rad_to_deg($oa[0])) $orientFieldX;
-    floatField -e -v (rad_to_deg($oa[1])) $orientFieldY;
-    floatField -e -v (rad_to_deg($oa[2])) $orientFieldZ;
+  string $container = `columnLayout container`;
+    string $axis = `rowLayout -nc 2 -cw2 20 190 axis`;
+      string $axisButton = `iconTextButton
+          // -bgc 0.5 0.0 0.0
+          -i $menuIcon
+          -w 20 -h 26
+          axisButton`;
+        string $axisMenu = `popupMenu
+            -b 1
+            -p $axisButton
+            -pmc ("nkAxisOrientationInvokeEvent(\"pmc\", \"axisMenu\");")
+            axisMenu`;
+      string $axisField = `textField
+          -ed false
+          -width 190
+          -height 26
+          -ann (uiRes("m_manipMoveProperties.kCustomAxisOrientationAnn"))
+          axisField`;
+      setParent ..;
+
+    string $orientFieldAnn = `uiRes("m_manipMoveProperties.kCustomAxisOrientFieldsAnn")`;
+    string $orient = `rowLayout -nc 4 -cw4 20 62 62 62 orient`;
+      string $orientButton = `iconTextButton
+          // -bgc 0.0 0.5 0.0
+          -i $menuIcon
+          -w 20 -h 26
+          orientButton`;
+        string $orientMenu = `popupMenu
+            -b 1
+            -p $orientButton
+            -pmc ("nkAxisOrientationInvokeEvent(\"pmc\", \"orientMenu\");")
+            orientMenu`;
+      string $orientFieldX = `floatField -w 62 -ann $orientFieldAnn
+          -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldX\");"
+          orientFieldX`;
+      string $orientFieldY = `floatField -w 62 -ann $orientFieldAnn
+          -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldY\");"
+          orientFieldY`;
+      string $orientFieldZ = `floatField -w 62 -ann $orientFieldAnn
+          -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldZ\");"
+          orientFieldZ`;
+      setParent ..;
+
+    string $customObject = `rowLayout -nc 2 -cw2 20 190 customObject`;
+      string $updateOrientButton = `iconTextButton
+          // -bgc 0.0 0.0 0.5
+          -i $refreshIcon
+          -w 20 -h 20
+          -ann "Update the custom axis orientation"
+          -c "nkAxisOrientationInvokeEvent(\"c\", \"updateOrientButton\");"
+          updateOrientButton`;
+      string $customObjectField = `textField
+          -width 190
+          -height 26
+          -ann "Enter a custom object"
+          -aie true
+          -ec "nkAxisOrientationInvokeEvent(\"ec\", \"customObjectField\");"
+          customObjectField`;
+      setParent ..;
+
+  // print (`format -s $container "// ^1s\n"`);
+  // print (`format -s $axis "// ^1s\n"`);
+  // print (`format -s $axisButton "// ^1s\n"`);
+  // print (`format -s $axisMenu "// ^1s\n"`);
+  // print (`format -s $axisField "// ^1s\n"`);
+  // print (`format -s $orient "// ^1s\n"`);
+  // print (`format -s $orientButton "// ^1s\n"`);
+  // print (`format -s $orientMenu "// ^1s\n"`);
+  // print (`format -s $orientFieldX "// ^1s\n"`);
+  // print (`format -s $orientFieldY "// ^1s\n"`);
+  // print (`format -s $orientFieldZ "// ^1s\n"`);
+  // print (`format -s $customObject "// ^1s\n"`);
+  // print (`format -s $updateOrientButton "// ^1s\n"`);
+  // print (`format -s $customObjectField "// ^1s\n"`);
+
+  setFocus nkAxisOrientationWindow;
+  showWindow nkAxisOrientationWindow;
+}
+
+proc registerScriptJob() {
+  nkAxisOrientationToolChanged();
+  nkAxisOrientationToolSettingsChanged();
+  int $toolChangedId = `scriptJob
+      -e "ToolChanged" "nkAxisOrientationToolChanged"
+      -p nkAxisOrientationWindow`;
+  int $toolSettingsChangedId = `scriptJob
+      -e "ToolSettingsChanged" "nkAxisOrientationToolSettingsChanged"
+      -p nkAxisOrientationWindow`;
+  print (`format -s $toolChangedId "// nkAxisOrientation-ToolChanged:^1s\n"`);
+  print (`format -s $toolSettingsChangedId "// nkAxisOrientation-ToolSettingsChanged:^1s\n"`);
+}
+proc initialize() {
+  buildMainWindow();
+  registerScriptJob();
+}
+
+global proc nkAxisOrientationToolChanged() {
+  updateControl();
+}
+global proc nkAxisOrientationToolSettingsChanged() {
+  updateControl();
+}
+global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
+  switch ($event) {
+    case "c":
+      switch ($control) {
+        case "miSelection": setToSelection(); break;
+        case "updateOrientButton": updateCustomOrientAxes(); break;
+        default: break;
+      }
+      break;
+    case "cc":
+      switch ($control) {
+        case "orientFieldX":
+          orientAxesChanged(0, "nkAxisOrientationWindow|container|orient|orientFieldX");
+          break;
+        case "orientFieldY":
+          orientAxesChanged(1, "nkAxisOrientationWindow|container|orient|orientFieldY");
+          break;
+        case "orientFieldZ":
+          orientAxesChanged(2, "nkAxisOrientationWindow|container|orient|orientFieldZ");
+          break;
+        default: break;
+      }
+      break;
+    case "ec":
+      switch ($control) {
+        case "customObjectField": updateCustomOrientAxes(); break;
+        default: break;
+      }
+      break;
+    case "pmc":
+      switch ($control) {
+        case "axisMenu":
+          buildAxisMenu("nkAxisOrientationWindow|container|axis|axisButton|axisMenu");
+          break;
+        case "orientMenu":
+          buildOrientMenu("nkAxisOrientationWindow|container|orient|orientButton|orientMenu");
+          break;
+        default: break;
+      }
+      break;
+    default: break;
   }
-
-  proc buildMainWindow() {
-    if (`window -ex nkAxisOrientationWindow` == true) {
-      deleteUI nkAxisOrientationWindow;
-    }
-    window -t ("AxisOrientation " + $version)
-        -mxb false
-        -mnb false
-        -s false
-        nkAxisOrientationWindow;
-
-    string $menuIcon = "popupMenuIcon.png";
-    string $refreshIcon = "refresh.png";
-
-    string $container = `columnLayout container`;
-      string $axis = `rowLayout -nc 2 -cw2 20 190 axis`;
-        string $axisButton = `iconTextButton
-            // -bgc 0.5 0.0 0.0
-            -i $menuIcon
-            -w 20 -h 26
-            axisButton`;
-          string $axisMenu = `popupMenu
-              -b 1
-              -p $axisButton
-              -pmc ("nkAxisOrientationInvokeEvent(\"pmc\", \"axisMenu\");")
-              axisMenu`;
-        string $axisField = `textField
-            -ed false
-            -width 190
-            -height 26
-            -ann (uiRes("m_manipMoveProperties.kCustomAxisOrientationAnn"))
-            axisField`;
-        setParent ..;
-
-      string $orientFieldAnn = `uiRes("m_manipMoveProperties.kCustomAxisOrientFieldsAnn")`;
-      string $orient = `rowLayout -nc 4 -cw4 20 62 62 62 orient`;
-        string $orientButton = `iconTextButton
-            // -bgc 0.0 0.5 0.0
-            -i $menuIcon
-            -w 20 -h 26
-            orientButton`;
-          string $orientMenu = `popupMenu
-              -b 1
-              -p $orientButton
-              -pmc ("nkAxisOrientationInvokeEvent(\"pmc\", \"orientMenu\");")
-              orientMenu`;
-        string $orientFieldX = `floatField -w 62 -ann $orientFieldAnn
-            -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldX\");"
-            orientFieldX`;
-        string $orientFieldY = `floatField -w 62 -ann $orientFieldAnn
-            -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldY\");"
-            orientFieldY`;
-        string $orientFieldZ = `floatField -w 62 -ann $orientFieldAnn
-            -cc "nkAxisOrientationInvokeEvent(\"cc\", \"orientFieldZ\");"
-            orientFieldZ`;
-        setParent ..;
-
-      string $customObject = `rowLayout -nc 2 -cw2 20 190 customObject`;
-        string $updateOrientButton = `iconTextButton
-            // -bgc 0.0 0.0 0.5
-            -i $refreshIcon
-            -w 20 -h 20
-            -ann "Update the custom axis orientation"
-            -c "nkAxisOrientationInvokeEvent(\"c\", \"updateOrientButton\");"
-            updateOrientButton`;
-        string $customObjectField = `textField
-            -width 190
-            -height 26
-            -ann "Enter a custom object"
-            -aie true
-            -ec "nkAxisOrientationInvokeEvent(\"ec\", \"customObjectField\");"
-            customObjectField`;
-        setParent ..;
-
-    // print (`format -s $container "// ^1s\n"`);
-    // print (`format -s $axis "// ^1s\n"`);
-    // print (`format -s $axisButton "// ^1s\n"`);
-    // print (`format -s $axisMenu "// ^1s\n"`);
-    // print (`format -s $axisField "// ^1s\n"`);
-    // print (`format -s $orient "// ^1s\n"`);
-    // print (`format -s $orientButton "// ^1s\n"`);
-    // print (`format -s $orientMenu "// ^1s\n"`);
-    // print (`format -s $orientFieldX "// ^1s\n"`);
-    // print (`format -s $orientFieldY "// ^1s\n"`);
-    // print (`format -s $orientFieldZ "// ^1s\n"`);
-    // print (`format -s $customObject "// ^1s\n"`);
-    // print (`format -s $updateOrientButton "// ^1s\n"`);
-    // print (`format -s $customObjectField "// ^1s\n"`);
-
-    setFocus nkAxisOrientationWindow;
-    showWindow nkAxisOrientationWindow;
-  }
-
-  proc registerScriptJob() {
-    nkAxisOrientationToolChanged();
-    nkAxisOrientationToolSettingsChanged();
-    int $toolChangedId = `scriptJob
-        -e "ToolChanged" "nkAxisOrientationToolChanged"
-        -p nkAxisOrientationWindow`;
-    int $toolSettingsChangedId = `scriptJob
-        -e "ToolSettingsChanged" "nkAxisOrientationToolSettingsChanged"
-        -p nkAxisOrientationWindow`;
-    print (`format -s $toolChangedId "// nkAxisOrientation-ToolChanged:^1s\n"`);
-    print (`format -s $toolSettingsChangedId "// nkAxisOrientation-ToolSettingsChanged:^1s\n"`);
-  }
-  proc nkAxisOrientationInitialize() {
-    buildMainWindow();
-    registerScriptJob();
-  }
-
-  global proc nkAxisOrientationToolChanged() {
-    updateControl();
-  }
-  global proc nkAxisOrientationToolSettingsChanged() {
-    updateControl();
-  }
-  global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
-    switch ($event) {
-      case "c":
-        switch ($control) {
-          case "miSelection": setToSelection(); break;
-          case "updateOrientButton": updateCustomOrientAxes(); break;
-          default: break;
-        }
-        break;
-      case "cc":
-        switch ($control) {
-          case "orientFieldX":
-            orientAxesChanged(0, "nkAxisOrientationWindow|container|orient|orientFieldX");
-            break;
-          case "orientFieldY":
-            orientAxesChanged(1, "nkAxisOrientationWindow|container|orient|orientFieldY");
-            break;
-          case "orientFieldZ":
-            orientAxesChanged(2, "nkAxisOrientationWindow|container|orient|orientFieldZ");
-            break;
-          default: break;
-        }
-        break;
-      case "ec":
-        switch ($control) {
-          case "customObjectField": updateCustomOrientAxes(); break;
-          default: break;
-        }
-        break;
-      case "pmc":
-        switch ($control) {
-          case "axisMenu":
-            buildAxisMenu("nkAxisOrientationWindow|container|axis|axisButton|axisMenu");
-            break;
-          case "orientMenu":
-            buildOrientMenu("nkAxisOrientationWindow|container|orient|orientButton|orientMenu");
-            break;
-          default: break;
-        }
-        break;
-      default: break;
-    }
-  }
-  global proc nkAxisOrientation() {
-    nkAxisOrientationInitialize();
-  }
+}
+global proc nkAxisOrientation() {
+  initialize();
 }
