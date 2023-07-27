@@ -1,4 +1,4 @@
-// © 2023 imaoki | MIT License | https://github.com/imaoki
+//! © 2023 imaoki | MIT License | https://github.com/imaoki
 //- @return <string>
 proc string getCurrentContext() {
   string $currentCtx = `currentCtx`;
@@ -310,7 +310,7 @@ proc updateControl() {
 
 //- @return <>
 proc buildMainWindow() {
-  string $version = "1.3.0";
+  string $version = "1.3.1";
 
   if (`window -ex nkAxisOrientationWindow` == true) {
     deleteUI nkAxisOrientationWindow;
@@ -394,22 +394,22 @@ proc buildMainWindow() {
           customObjectField`;
       setParent ..;
 
-  // print (`format -s $container "// ^1s\n"`);
-  // print (`format -s $axis "// ^1s\n"`);
-  // print (`format -s $axisButton "// ^1s\n"`);
-  // print (`format -s $axisMenuLast "// ^1s\n"`);
-  // print (`format -s $axisMenu "// ^1s\n"`);
-  // print (`format -s $axisField "// ^1s\n"`);
-  // print (`format -s $orient "// ^1s\n"`);
-  // print (`format -s $orientButton "// ^1s\n"`);
-  // print (`format -s $orientMenu "// ^1s\n"`);
-  // print (`format -s $orientMenuLast "// ^1s\n"`);
-  // print (`format -s $orientFieldX "// ^1s\n"`);
-  // print (`format -s $orientFieldY "// ^1s\n"`);
-  // print (`format -s $orientFieldZ "// ^1s\n"`);
-  // print (`format -s $customObject "// ^1s\n"`);
-  // print (`format -s $updateOrientButton "// ^1s\n"`);
-  // print (`format -s $customObjectField "// ^1s\n"`);
+  // print `format -s $container "// ^1s\n"`;
+  // print `format -s $axis "// ^1s\n"`;
+  // print `format -s $axisButton "// ^1s\n"`;
+  // print `format -s $axisMenuLast "// ^1s\n"`;
+  // print `format -s $axisMenu "// ^1s\n"`;
+  // print `format -s $axisField "// ^1s\n"`;
+  // print `format -s $orient "// ^1s\n"`;
+  // print `format -s $orientButton "// ^1s\n"`;
+  // print `format -s $orientMenu "// ^1s\n"`;
+  // print `format -s $orientMenuLast "// ^1s\n"`;
+  // print `format -s $orientFieldX "// ^1s\n"`;
+  // print `format -s $orientFieldY "// ^1s\n"`;
+  // print `format -s $orientFieldZ "// ^1s\n"`;
+  // print `format -s $customObject "// ^1s\n"`;
+  // print `format -s $updateOrientButton "// ^1s\n"`;
+  // print `format -s $customObjectField "// ^1s\n"`;
 
   setFocus nkAxisOrientationWindow;
   showWindow nkAxisOrientationWindow;
