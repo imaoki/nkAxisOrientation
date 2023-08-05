@@ -1,0 +1,14 @@
+{
+  string $pSphere[] = `polySphere`;
+  string $pCube[] = `polyCube`;
+  string $pCylinder[] = `polyCylinder`;
+  string $sphere = $pSphere[0];
+  string $cube = $pCube[0];
+  string $cylinder = $pCylinder[0];
+  move 3 0 0 $sphere;
+  move 0 0 3 $cylinder;
+  rotate 30 0 -30 $sphere;
+  rotate -30 0 0 $cube;
+  rotate 0 0 30 $cylinder;
+  parent $sphere $cube;
+}
