@@ -311,12 +311,10 @@ proc updateControl() {
 
 //- @return <>
 proc buildMainWindow() {
-  string $version = "1.3.1";
-
   if (`window -ex nkAxisOrientationWindow` == true) {
     deleteUI nkAxisOrientationWindow;
   }
-  window -t ("AxisOrientation " + $version)
+  window -t ("AxisOrientation " + (nkAxisOrientationVersion()))
       -mxb false
       -mnb false
       -s false
@@ -496,6 +494,10 @@ global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
       break;
     default: break;
   }
+}
+//- @return <string>
+global proc string nkAxisOrientationVersion() {
+  return "1.3.2";
 }
 //- @return <>
 global proc nkAxisOrientation() {
