@@ -1,6 +1,7 @@
-//! © 2023 imaoki | MIT License | https://github.com/imaoki
-
-//- @return <string>
+/*! © 2023 imaoki | MIT License | https://github.com/imaoki */
+/*-
+@return <string>
+*/
 proc string getCurrentContext() {
   string $currentCtx = `currentCtx`;
   switch ($currentCtx) {
@@ -11,12 +12,16 @@ proc string getCurrentContext() {
   return "";
 }
 
-//- @return <string>
+/*-
+@return <string>
+*/
 proc string getCustomObject() {
   return `textField -q -tx
       "nkAxisOrientationWindow|container|customObject|customObjectField"`;
 }
-//- @return <>
+/*-
+@return <>
+*/
 proc setCustomObject() {
   string $selection[] = `ls -sl -tr`;
   if (`size $selection` == 1 && `objExists $selection[0]`) {
@@ -24,7 +29,9 @@ proc setCustomObject() {
         "nkAxisOrientationWindow|container|customObject|customObjectField";
   }
 }
-//- @return <>
+/*-
+@return <>
+*/
 proc updateCustomOrientAxes() {
   string $customObject = getCustomObject();
   if (`objExists $customObject`) {
@@ -36,15 +43,19 @@ proc updateCustomOrientAxes() {
     }
   }
 }
-//- @return <>
+/*-
+@return <>
+*/
 proc setToSelection() {
   setCustomObject();
   updateCustomOrientAxes();
 }
 
-//- @arg $axis <int>
-//- @arg $field <string>
-//- @return <>
+/*-
+@arg $axis <int>
+@arg $field <string>
+@return <>
+*/
 proc orientAxesChanged(int $axis, string $field) {
   float $value = `floatField -q -v $field`;
   switch (getCurrentContext()) {
@@ -73,8 +84,10 @@ proc orientAxesChanged(int $axis, string $field) {
   }
 }
 
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildMoveOrientMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l "Set to Selection"
@@ -92,8 +105,10 @@ proc buildMoveOrientMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kMoveResetOri"))
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildRotateOrientMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l "Set to Selection"
@@ -111,8 +126,10 @@ proc buildRotateOrientMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kMoveResetOri"))
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildScaleOrientMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l "Set to Selection"
@@ -130,8 +147,10 @@ proc buildScaleOrientMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kMoveResetOri"))
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildOrientMenu(string $menu) {
   switch (getCurrentContext()) {
     case "Move": buildMoveOrientMenu($menu); break;
@@ -140,8 +159,10 @@ proc buildOrientMenu(string $menu) {
     default: break;
   }
 }
-//- @arg $mode <int>
-//- @return <>
+/*-
+@arg $mode <int>
+@return <>
+*/
 proc setOrient(int $mode) {
   global int $nkAxisOrientationOrientLast = 4;
   if ($mode == -1) $mode = $nkAxisOrientationOrientLast;
@@ -159,8 +180,10 @@ proc setOrient(int $mode) {
   }
 }
 
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildMoveAxisMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l (uiRes("m_manipMoveProperties.kObject"))
@@ -180,8 +203,10 @@ proc buildMoveAxisMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kCustomAxisOrientation"))
       -p $menu -c "manipMoveContext -e -m 6 \"Move\"";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildRotateAxisMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l (uiRes("m_manipMoveProperties.kObject"))
@@ -195,8 +220,10 @@ proc buildRotateAxisMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kCustomAxisOrientation"))
       -p $menu -c "manipRotateContext -e -m 3 \"Rotate\"";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildScaleAxisMenu(string $menu) {
   menu -e -dai $menu;
   menuItem -l (uiRes("m_manipMoveProperties.kObject"))
@@ -216,8 +243,10 @@ proc buildScaleAxisMenu(string $menu) {
   menuItem -l (uiRes("m_manipMoveProperties.kCustomAxisOrientation"))
       -p $menu -c "manipScaleContext -e -m 6 \"Scale\"";
 }
-//- @arg $menu <string>
-//- @return <>
+/*-
+@arg $menu <string>
+@return <>
+*/
 proc buildAxisMenu(string $menu) {
   switch (getCurrentContext()) {
     case "Move": buildMoveAxisMenu($menu); break;
@@ -226,7 +255,9 @@ proc buildAxisMenu(string $menu) {
     default: break;
   }
 }
-//- @return <>
+/*-
+@return <>
+*/
 proc setLastAxis() {
   switch (getCurrentContext()) {
     case "Move":
@@ -245,7 +276,9 @@ proc setLastAxis() {
   }
 }
 
-//- @return <>
+/*-
+@return <>
+*/
 proc updateControl() {
   string $container = "nkAxisOrientationWindow|container";
   string $axisField = "nkAxisOrientationWindow|container|axis|axisField";
@@ -309,7 +342,9 @@ proc updateControl() {
   floatField -e -v (rad_to_deg($orientAxes[2])) $orientFieldZ;
 }
 
-//- @return <>
+/*-
+@return <>
+*/
 proc buildMainWindow() {
   if (`window -ex nkAxisOrientationWindow` == true) {
     deleteUI nkAxisOrientationWindow;
@@ -414,7 +449,9 @@ proc buildMainWindow() {
   showWindow nkAxisOrientationWindow;
 }
 
-//- @return <>
+/*-
+@return <>
+*/
 proc registerScriptJob() {
   nkAxisOrientationToolChanged();
   nkAxisOrientationToolSettingsChanged();
@@ -427,23 +464,31 @@ proc registerScriptJob() {
   print (`format -s $toolChangedId "// nkAxisOrientation-ToolChanged:^1s\n"`);
   print (`format -s $toolSettingsChangedId "// nkAxisOrientation-ToolSettingsChanged:^1s\n"`);
 }
-//- @return <>
+/*-
+@return <>
+*/
 proc initialize() {
   buildMainWindow();
   registerScriptJob();
 }
 
-//- @return <>
+/*-
+@return <>
+*/
 global proc nkAxisOrientationToolChanged() {
   updateControl();
 }
-//- @return <>
+/*-
+@return <>
+*/
 global proc nkAxisOrientationToolSettingsChanged() {
   updateControl();
 }
-//- @arg $event <string>
-//- @arg $control <string>
-//- @return <>
+/*-
+@arg $event <string>
+@arg $control <string>
+@return <>
+*/
 global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
   switch ($event) {
     case "c":
@@ -495,11 +540,15 @@ global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
     default: break;
   }
 }
-//- @return <string>
+/*-
+@return <string>
+*/
 global proc string nkAxisOrientationVersion() {
   return "1.3.2";
 }
-//- @return <>
+/*-
+@return <>
+*/
 global proc nkAxisOrientation() {
   initialize();
 }
