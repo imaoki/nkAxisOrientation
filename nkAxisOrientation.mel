@@ -1,6 +1,6 @@
 /*! © 2023 imaoki | MIT License | https://github.com/imaoki */
 /*-
-@return <string>
+@returns <string>
 */
 proc string getCurrentContext() {
   string $currentCtx = `currentCtx`;
@@ -13,14 +13,14 @@ proc string getCurrentContext() {
 }
 
 /*-
-@return <string>
+@returns <string>
 */
 proc string getCustomObject() {
   return `textField -q -tx
       "nkAxisOrientationWindow|container|customObject|customObjectField"`;
 }
 /*-
-@return <>
+@returns <>
 */
 proc setCustomObject() {
   string $selection[] = `ls -sl -tr`;
@@ -30,7 +30,7 @@ proc setCustomObject() {
   }
 }
 /*-
-@return <>
+@returns <>
 */
 proc updateCustomOrientAxes() {
   string $customObject = getCustomObject();
@@ -44,7 +44,7 @@ proc updateCustomOrientAxes() {
   }
 }
 /*-
-@return <>
+@returns <>
 */
 proc setToSelection() {
   setCustomObject();
@@ -52,9 +52,9 @@ proc setToSelection() {
 }
 
 /*-
-@arg $axis <int>
-@arg $field <string>
-@return <>
+@param $axis <int>
+@param $field <string>
+@returns <>
 */
 proc orientAxesChanged(int $axis, string $field) {
   float $value = `floatField -q -v $field`;
@@ -85,8 +85,8 @@ proc orientAxesChanged(int $axis, string $field) {
 }
 
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildMoveOrientMenu(string $menu) {
   menu -e -dai $menu;
@@ -106,8 +106,8 @@ proc buildMoveOrientMenu(string $menu) {
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildRotateOrientMenu(string $menu) {
   menu -e -dai $menu;
@@ -127,8 +127,8 @@ proc buildRotateOrientMenu(string $menu) {
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildScaleOrientMenu(string $menu) {
   menu -e -dai $menu;
@@ -148,8 +148,8 @@ proc buildScaleOrientMenu(string $menu) {
       -p $menu -c "nkAxisOrientationInvokeEvent(\"c\", \"miReset\");";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildOrientMenu(string $menu) {
   switch (getCurrentContext()) {
@@ -160,8 +160,8 @@ proc buildOrientMenu(string $menu) {
   }
 }
 /*-
-@arg $mode <int>
-@return <>
+@param $mode <int>
+@returns <>
 */
 proc setOrient(int $mode) {
   global int $nkAxisOrientationOrientLast = 4;
@@ -181,8 +181,8 @@ proc setOrient(int $mode) {
 }
 
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildMoveAxisMenu(string $menu) {
   menu -e -dai $menu;
@@ -204,8 +204,8 @@ proc buildMoveAxisMenu(string $menu) {
       -p $menu -c "manipMoveContext -e -m 6 \"Move\"";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildRotateAxisMenu(string $menu) {
   menu -e -dai $menu;
@@ -221,8 +221,8 @@ proc buildRotateAxisMenu(string $menu) {
       -p $menu -c "manipRotateContext -e -m 3 \"Rotate\"";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildScaleAxisMenu(string $menu) {
   menu -e -dai $menu;
@@ -244,8 +244,8 @@ proc buildScaleAxisMenu(string $menu) {
       -p $menu -c "manipScaleContext -e -m 6 \"Scale\"";
 }
 /*-
-@arg $menu <string>
-@return <>
+@param $menu <string>
+@returns <>
 */
 proc buildAxisMenu(string $menu) {
   switch (getCurrentContext()) {
@@ -256,7 +256,7 @@ proc buildAxisMenu(string $menu) {
   }
 }
 /*-
-@return <>
+@returns <>
 */
 proc setLastAxis() {
   switch (getCurrentContext()) {
@@ -277,7 +277,7 @@ proc setLastAxis() {
 }
 
 /*-
-@return <>
+@returns <>
 */
 proc updateControl() {
   string $container = "nkAxisOrientationWindow|container";
@@ -343,7 +343,7 @@ proc updateControl() {
 }
 
 /*-
-@return <>
+@returns <>
 */
 proc buildMainWindow() {
   if (`window -ex nkAxisOrientationWindow` == true) {
@@ -450,7 +450,7 @@ proc buildMainWindow() {
 }
 
 /*-
-@return <>
+@returns <>
 */
 proc registerScriptJob() {
   nkAxisOrientationToolChanged();
@@ -465,7 +465,7 @@ proc registerScriptJob() {
   print (`format -s $toolSettingsChangedId "// nkAxisOrientation-ToolSettingsChanged:^1s\n"`);
 }
 /*-
-@return <>
+@returns <>
 */
 proc initialize() {
   buildMainWindow();
@@ -473,21 +473,21 @@ proc initialize() {
 }
 
 /*-
-@return <>
+@returns <>
 */
 global proc nkAxisOrientationToolChanged() {
   updateControl();
 }
 /*-
-@return <>
+@returns <>
 */
 global proc nkAxisOrientationToolSettingsChanged() {
   updateControl();
 }
 /*-
-@arg $event <string>
-@arg $control <string>
-@return <>
+@param $event <string>
+@param $control <string>
+@returns <>
 */
 global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
   switch ($event) {
@@ -541,13 +541,13 @@ global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
   }
 }
 /*-
-@return <string>
+@returns <string>
 */
 global proc string nkAxisOrientationVersion() {
   return "1.3.2";
 }
 /*-
-@return <>
+@returns <>
 */
 global proc nkAxisOrientation() {
   initialize();
