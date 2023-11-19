@@ -45,7 +45,7 @@
 ## 使い方
 
 ```mel
-nkAxisOrientation();
+nkAxisOrientation;
 ```
 
 <!-- ## 制限 -->
