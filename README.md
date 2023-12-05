@@ -3,7 +3,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/releases/latest)
 [![GitHub](https://img.shields.io/github/license/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/blob/main/LICENSE)
 
-移動/回転/スケールツールのAxis Orientationを設定する。
+移動/回転/スケールツールのAxis Orientationを設定するツール。
 
 ## 特徴
 
@@ -25,11 +25,11 @@
 
 ## 開発環境
 
-`Maya 2022.5`
+Maya 2022.5 / Windows 10
 
 ## インストール
 
-01. `nkAxisOrientation.mel`をコピーする。
+01. `nkAxisOrientation.mel`をスクリプトディレクトリにコピー
 
     英語版
     : `%MAYA_APP_DIR%\<version>\scripts`
@@ -37,16 +37,15 @@
     日本語版
     : `%MAYA_APP_DIR%\<version>\ja_JP\scripts`
 
-    複数バージョン
-    : `%MAYA_APP_DIR%\scripts`
-
 02. Mayaを再起動
 
-## 使い方
+## 起動方法
 
 ```mel
 nkAxisOrientation;
 ```
+
+<!-- ## 使い方 -->
 
 <!-- ## 制限 -->
 
@@ -58,5 +57,5 @@ nkAxisOrientation;
 
 ## 追加情報
 
-* 標準のツール設定と同様に、メニューボタン（▼）をマウス中ボタンでクリックすると前回選択していたモードに切り替えることができる。
+* 標準のツール設定と同様に、メニューボタン（▼）をマウス中ボタンでクリックすると前回選択していたモードに切り替えることができます。
   カスタム軸の選択メニューボタンの場合は前回の項目を再実行。
