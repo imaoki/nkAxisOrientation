@@ -569,6 +569,6 @@ global proc nkAxisOrientation() {
 }
 
 /*
-eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/library/nkAxisOrientation/nkAxisOrientation.mel\"");
+eval ("source \"" + `getenv "MAYA_APP_DIR"` + "/dev/nkAxisOrientation/nkAxisOrientation.mel\"");
 nkAxisOrientation;
 */
