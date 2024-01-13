@@ -29,9 +29,9 @@ proc string getCustomObject() {
 @returns <>
 */
 proc setCustomObject() {
-  string $selection[] = `ls -sl -tr`;
-  if (`size $selection` == 1 && `objExists $selection[0]`) {
-    textField -e -tx $selection[0]
+  string $nodes[] = `ls -sl -tr`;
+  if (`size $nodes` == 1 && `objExists $nodes[0]`) {
+    textField -e -tx $nodes[0]
         "nkAxisOrientationWindow|container|customObject|customObjectField";
   }
 }
@@ -559,7 +559,7 @@ global proc nkAxisOrientationInvokeEvent(string $event, string $control) {
 @returns <string>
 */
 global proc string nkAxisOrientationVersion() {
-  return "1.3.4";
+  return "1.3.5";
 }
 /*-
 @returns <>
