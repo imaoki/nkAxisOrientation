@@ -1,9 +1,8 @@
 # nkAxisOrientation
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/releases/latest)
-[![GitHub](https://img.shields.io/github/license/imaoki/nkAxisOrientation)](https://github.com/imaoki/nkAxisOrientation/blob/main/LICENSE)
 
-移動/回転/スケールツールのAxis Orientationを設定するツール。
+移動/回転/スケールツールのAxis Orientationを設定するMELツール。
 
 ## 特徴
 
